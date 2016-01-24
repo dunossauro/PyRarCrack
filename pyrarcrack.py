@@ -1,5 +1,5 @@
 #!/bin/python3
-#   V: 0.0.2
+#   V: 0.0.2.1
 #   D: github.com/z4r4tu5tr4
 #
 #
@@ -44,13 +44,13 @@ if final < inicio:
 
 # ----- Lista de caracteres aceitos
 alfabeto = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ÁáÂâàÀÃãÅåÄäÆæÉéÊêÈèËëÐðÍíÎîÌìÏïÓóÒòÔôØøÕõÖöÚúÛûÙùÜüÇçÑñÝý®©Þþß"
-caracteres_especiais = "();<>\`|~\"&\''}]"
+caracteres_especiais = "();<>\`|~\"&\'}]"
 
 # ----- Função que gera combinações partindo dos argumentos
-def forca_bruta(charset, maxlength):
-    return (''.join(candidate)
-        for candidate in chain.from_iterable(product(charset, repeat=x)
-        for x in range(inicio, maxlength + 1)))
+def forca_bruta(string, tamanho):
+    return (''.join(candidato)
+        for candidato in chain.from_iterable(product(string, repeat=x)
+        for x in range(inicio, tamanho + 1)))
 
 # ----- Attack_list recebe a interação
 attack_list = forca_bruta(alfabeto, final)
