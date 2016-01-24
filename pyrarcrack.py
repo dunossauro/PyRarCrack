@@ -1,5 +1,5 @@
 #!/bin/python3
-#   V: 0.0.1
+#   V: 0.0.2
 #   D: github.com/z4r4tu5tr4
 #
 #
@@ -8,7 +8,7 @@
 #   http://www.enigmagroup.org/code/view/python/168-Rar-password-cracker
 #   http://rarcrack.sourceforge.net/
 
-import itertools
+from itertools import chain, product
 from os import system, popen
 from sys import argv
 import time
@@ -49,7 +49,7 @@ caracteres_especiais = "();<>\`|~\"&\''}]"
 # ----- Função que gera combinações partindo dos argumentos
 def forca_bruta(charset, maxlength):
     return (''.join(candidate)
-        for candidate in itertools.chain.from_iterable(itertools.product(charset, repeat=x)
+        for candidate in chain.from_iterable(product(charset, repeat=x)
         for x in range(inicio, maxlength + 1)))
 
 # ----- Attack_list recebe a interação
