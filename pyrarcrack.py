@@ -1,102 +1,100 @@
-'''
-V: 0.0.2.3
+"""
+Bruteforce attack for .rar using unrar
 
-Baseado em:
+V: 0.0.2.4
+
+Based on:
 http://stackoverflow.com/questions/11747254/python-brute-force-algorithm
 http://www.enigmagroup.org/code/view/python/168-Rar-password-cracker
 http://rarcrack.sourceforge.net/
-'''
+"""
 
+from argparse import ArgumentParser
 from itertools import chain, product
-from os import popen
-from sys import argv
+from subprocess import Popen, PIPE
+from os.path import exists
 import time
+from string import printable
 
-if argv[1] == '--help' or argv[1] == '-h':
-    print(
-        '''Use: {} <Numero_do_inicio> <Numero_do_final> <Arquivo.rar>\n\n\
-<Numero_do_inicio> = numero do tamanho da string inicial\n\
-    ex: 5 = 00000\n\n\
-<Numero_do_final> = numero do tamanho da string final\n\
-    ex: 10 = ßßßßßßßßßß'''.format(
-            argv[0]
-        )
-    )
-    exit()
+chars = (
+    printable
+    + 'ÁáÂâàÀÃãÅåÄäÆæÉéÊêÈèËëÐðÍíÎîÌìÏïÓóÒòÔôØøÕõÖöÚúÛûÙùÜüÇçÑñÝý®©Þþß'
+)
+special_chars = "();<>\`|~\"&\'}]"
 
-elif len(argv) != 4:
-    print(
-        'Use: {} <Numero_do_inicio> <Numero_do_final> <Arquivo.rar>'.format(
-            argv[0]
-        )
-    )
+parser = ArgumentParser(description='Python combination generator to unrar')
+parser.add_argument(
+    '--start',
+    help='Number of characters of the initial string [1 -> "a", 2 -> "aa"]',
+    type=int,
+)
 
-    print('Para mais informações, digite {} --help'.format(argv[0]))
+parser.add_argument(
+    '--stop',
+    help='Number of characters of the final string [3 -> "ßßß"]',
+    type=int,
+)
 
-    exit()
+parser.add_argument(
+    '--verbose',
+    help='Show combintations',
+    default=False,
+    required=False,
+)
 
-# ----- Inicio e final recebem os valores passados por argumentos
-try:
-    inicio = int(argv[1])
-    final = int(argv[2])
-except ValueError:
-    print('Digite valores inteiros para a verificação')
-    print('Para mais informações, digite {} --help'.format(argv[0]))
-    exit()
+parser.add_argument(
+    '--alphabet',
+    help='alternative chars to combinations',
+    default=chars,
+    required=False,
+)
 
-# ----- Verificação de um cenário possível
-if final < inicio:
-    print('{} é maior que {}'.format(final, inicio))
-    print('Para mais informações, digite %s --help'.format(argv[0]))
-    exit()
+parser.add_argument('--file', help='.rar file [file.rar]', type=str)
 
-# ----- Lista de caracteres aceitos
-alfabeto = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\
-            \"#$%&\'()*+,-./:;<=>?@[\]^_`{|}~ÁáÂâàÀÃãÅåÄäÆæÉéÊêÈèËëÐðÍíÎîÌì\
-            ÏïÓóÒòÔôØøÕõÖöÚúÛûÙùÜüÇçÑñÝý®©Þþß'
-
-caracteres_especiais = "();<>\`|~\"&\'}]"
+args = parser.parse_args()
 
 
-def forca_bruta(string, tamanho):
+def generate_combinations(alphabet, length):
     """
-    Gera combinações partindo dos argumentos.
+    Generate combinations using alphabet
     """
     return (
-        ''.join(candidato)
-        for candidato in chain.from_iterable(
-            product(string, repeat=x) for x in range(inicio, tamanho + 1)
+        ''.join(string)
+        for string in chain.from_iterable(
+            product(alphabet, repeat=x) for x in range(args.start, length + 1)
         )
     )
 
 
-# Attack_list recebe a interação
-attack_list = forca_bruta(alfabeto, final)
-
-
-def formata(string):
+def format(string):
     """
-    Formata para os caracteres aceitos pelo unrar.
+    Format chars to write then in shell.
     """
-    _string = []
-    for x in string:
-        if x in caracteres_especiais:
-            x = ("\\%s") % (x)
-        _string.append(x)
-    return "".join(_string)
-
-
-# ----- Laço do ataque
-for attack in attack_list:
-    comeco = time.time()
-    print('Tentando:\t%s'.format(attack))
-    attack = formata(attack)
-    console = popen(
-        "unrar t -y -p{} {} 2>&1 | grep 'All OK'".format(attack, argv[3])
+    formated = map(
+        lambda char: char if char not in special_chars else '\\{}'.format(char),
+        string
     )
-    for x in console.readlines():
-        if x == 'All OK\n':
-            print("Senha encontrada {}".format(attack))
-            print("Levou: {} segundos".format(time.time() - comeco))
+    return ''.join(formated)
 
+
+if __name__ == '__main__':
+    if not exists(args.file):
+        raise FileNotFoundError(args.file)
+
+    if args.stop < args.start:
+        raise Exception('Stop number is less than start')
+
+    start_time = time.time()
+    for combination in generate_combinations(args.alphabet, args.stop):
+        formated_combination = format(combination)
+        if args.verbose:
+            print('Trying: {}'.format(combination))
+        cmd = Popen(
+            "unrar t -p{} {}".format('1234567890', args.file).split(),
+            stdout=PIPE, stderr=PIPE
+        )
+        out, err = cmd.communicate()
+        if 'All OK' in out.decode():
+            print('Password found: {}'.format(combination))
+            print('Time: {}'.format(time.time() - start_time))
             exit()
