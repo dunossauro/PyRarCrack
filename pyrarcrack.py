@@ -52,7 +52,7 @@ args = parser.parse_args()
 
 def generate_combinations(alphabet, length):
     """Generate combinations using alphabet."""
-    return (
+    yield from (
         ''.join(string)
         for string in chain.from_iterable(
             product(alphabet, repeat=x) for x in range(args.start, length + 1)
