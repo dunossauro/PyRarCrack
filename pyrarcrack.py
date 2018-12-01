@@ -1,5 +1,5 @@
 """
-Bruteforce attack for .rar using unrar
+Bruteforce attack for .rar using unrar.
 
 V: 0.0.2.4
 
@@ -20,7 +20,7 @@ chars = (
     printable
     + 'ÁáÂâàÀÃãÅåÄäÆæÉéÊêÈèËëÐðÍíÎîÌìÏïÓóÒòÔôØøÕõÖöÚúÛûÙùÜüÇçÑñÝý®©Þþß'
 )
-special_chars = "();<>\`|~\"&\'}]"
+special_chars = "();<>`|~\"&\'}]"
 
 parser = ArgumentParser(description='Python combination generator to unrar')
 parser.add_argument(
@@ -55,9 +55,7 @@ args = parser.parse_args()
 
 
 def generate_combinations(alphabet, length):
-    """
-    Generate combinations using alphabet
-    """
+    """Generate combinations using alphabet."""
     return (
         ''.join(string)
         for string in chain.from_iterable(
@@ -67,11 +65,9 @@ def generate_combinations(alphabet, length):
 
 
 def format(string):
-    """
-    Format chars to write then in shell.
-    """
+    """Format chars to write them in shell."""
     formated = map(
-        lambda char: char if char not in special_chars else '\\{}'.format(char),
+        lambda char: char if char not in special_chars else f'\\{char}',
         string
     )
     return ''.join(formated)
@@ -88,13 +84,13 @@ if __name__ == '__main__':
     for combination in generate_combinations(args.alphabet, args.stop):
         formated_combination = format(combination)
         if args.verbose:
-            print('Trying: {}'.format(combination))
+            print(f'Trying: {combination}')
         cmd = Popen(
-            "unrar t -p{} {}".format('1234567890', args.file).split(),
+            f'unrar t -p{formated_combination} {args.file}'.split(),
             stdout=PIPE, stderr=PIPE
         )
         out, err = cmd.communicate()
         if 'All OK' in out.decode():
-            print('Password found: {}'.format(combination))
-            print('Time: {}'.format(time.time() - start_time))
+            print(f'Password found: {combination}')
+            print(f'Time: {time.time() - start_time}')
             exit()
