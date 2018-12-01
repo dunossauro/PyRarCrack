@@ -35,10 +35,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--verbose',
-    help='Show combintations',
-    default=False,
-    required=False,
+    '--verbose', help='Show combintations', default=False, required=False
 )
 
 parser.add_argument(
@@ -66,8 +63,7 @@ def generate_combinations(alphabet, length):
 def format(string):
     """Format chars to write them in shell."""
     formated = map(
-        lambda char: char if char not in special_chars else f'\\{char}',
-        string
+        lambda char: char if char not in special_chars else f'\\{char}', string
     )
     return ''.join(formated)
 
@@ -82,13 +78,17 @@ if __name__ == '__main__':
     start_time = time()
     for combination in generate_combinations(args.alphabet, args.stop):
         formated_combination = format(combination)
+
         if args.verbose:
             print(f'Trying: {combination}')
+
         cmd = Popen(
             f'unrar t -p{formated_combination} {args.file}'.split(),
-            stdout=PIPE, stderr=PIPE
+            stdout=PIPE,
+            stderr=PIPE,
         )
         out, err = cmd.communicate()
+
         if 'All OK' in out.decode():
             print(f'Password found: {combination}')
             print(f'Time: {time() - start_time}')
