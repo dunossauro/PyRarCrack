@@ -8,13 +8,12 @@ http://stackoverflow.com/questions/11747254/python-brute-force-algorithm
 http://www.enigmagroup.org/code/view/python/168-Rar-password-cracker
 http://rarcrack.sourceforge.net/
 """
-
 from argparse import ArgumentParser
 from itertools import chain, product
-from subprocess import Popen, PIPE
 from os.path import exists
-import time
 from string import printable
+from subprocess import PIPE, Popen
+from time import time
 
 chars = (
     printable
@@ -80,7 +79,7 @@ if __name__ == '__main__':
     if args.stop < args.start:
         raise Exception('Stop number is less than start')
 
-    start_time = time.time()
+    start_time = time()
     for combination in generate_combinations(args.alphabet, args.stop):
         formated_combination = format(combination)
         if args.verbose:
@@ -92,5 +91,5 @@ if __name__ == '__main__':
         out, err = cmd.communicate()
         if 'All OK' in out.decode():
             print(f'Password found: {combination}')
-            print(f'Time: {time.time() - start_time}')
+            print(f'Time: {time() - start_time}')
             exit()
