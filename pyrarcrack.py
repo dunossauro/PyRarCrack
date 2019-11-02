@@ -50,12 +50,12 @@ parser.add_argument('--file', help='.rar file [file.rar]', type=str)
 args = parser.parse_args()
 
 
-def generate_combinations(alphabet, length):
+def generate_combinations(alphabet, length, start=1):
     """Generate combinations using alphabet."""
     yield from (
         ''.join(string)
         for string in chain.from_iterable(
-            product(alphabet, repeat=x) for x in range(args.start, length + 1)
+            product(alphabet, repeat=x) for x in range(start, length + 1)
         )
     )
 
@@ -76,7 +76,9 @@ if __name__ == '__main__':
         raise Exception('Stop number is less than start')
 
     start_time = time()
-    for combination in generate_combinations(args.alphabet, args.stop):
+    for combination in generate_combinations(
+        args.alphabet, args.stop, args.start
+    ):
         formated_combination = format(combination)
 
         if args.verbose:
