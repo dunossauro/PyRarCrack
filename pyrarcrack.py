@@ -35,7 +35,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--verbose', help='Show combintations', default=False, required=False
+    '--verbose', help='Show combinations', default=False, required=False
 )
 
 parser.add_argument(
